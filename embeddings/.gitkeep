@@ -1,0 +1,2 @@
+# Pre-computed movie embeddings (.npy) and metadata (movies.csv) go here
+# Run: python backend/services/generate_embeddings.py to generate
