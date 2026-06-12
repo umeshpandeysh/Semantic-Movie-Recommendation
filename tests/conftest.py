@@ -35,9 +35,9 @@ def dummy_movies_df():
     """Minimal DataFrame matching movies_metadata.csv schema."""
     return pd.DataFrame({
         'movie_id': list(range(1, 21)),
-        'title':    [f'Movie {i}' for i in range(1, 21)],
-        'genre':    ['Drama' if i % 2 == 0 else 'Sci-Fi' for i in range(1, 21)],
-        'year':     [2000 + i for i in range(1, 21)],
-        'plot':     [f'A story about event {i} and its outcome.' for i in range(1, 21)],
-        'rating':   [round(6.0 + (i % 10) * 0.3, 1) for i in range(1, 21)],
+        'title': [f'Movie {i}' for i in range(1, 21)],
+        'genre': ['Drama' if i % 2 == 0 else 'Sci-Fi' for i in range(1, 21)],
+        'year': [2000 + i for i in range(1, 21)],
+        'plot': [f'A story about event {i} and its outcome.' for i in range(1, 21)],
+        'rating': [round(6.0 + (i % 10) * 0.3, 1) for i in range(1, 21)],
     })
