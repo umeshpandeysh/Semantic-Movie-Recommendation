@@ -1,9 +1,8 @@
 # 🎬 Semantic Movie Recommendation Engine
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
-[![NLP](https://img.shields.io/badge/NLP-Sentence%20Embeddings-8E44AD?style=flat&logo=python&logoColor=white)]()
-[![React](https://img.shields.io/badge/React-18+-20232A?style=flat&logo=react&logoColor=61DAFB)](https://reactjs.org)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-43853D?style=flat&logo=node.js&logoColor=white)](https://nodejs.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![NLP](https://img.shields.io/badge/NLP-Sentence%20Transformers-8E44AD?style=flat)](https://www.sbert.net)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 > A semantic search-based movie recommendation system that understands the **meaning** behind your query rather than just matching keywords. Powered by sentence embeddings and cosine similarity over a large movie metadata corpus.
@@ -129,15 +128,18 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-    A[React Frontend :3000] --> B[Express API Server :5000]
+    A[Client] --> B[FastAPI Server]
     B --> C[POST /api/recommend]
     B --> D[GET /api/movies]
-    B --> E[GET /api/health]
-    C --> F[Embedding Service]
-    F --> G[Pre-computed Embeddings .npy]
-    F --> H[Movie Metadata CSV]
-    G & H --> I[Cosine Similarity Engine]
-    I --> J[Ranked Results JSON]
+    B --> E[GET /api/movies/id]
+    B --> F[GET /api/health]
+    C --> G[RecommendationEngine]
+    G --> H[EmbeddingService]
+    H --> I[sentence-transformers]
+    G --> J[Pre-computed .npy Embeddings]
+    G --> K[movies_metadata.csv]
+    J & K --> L[Cosine Similarity Ranking]
+    L --> M[Top-K Results JSON]
 ```
 
 ### API Endpoints
@@ -146,7 +148,15 @@ graph TD
 |--------|----------|-------------|
 | `POST` | `/api/recommend` | Get movie recommendations from text query |
 | `GET` | `/api/movies` | List all movies in the corpus |
+| `GET` | `/api/movies/{id}` | Get a specific movie by ID |
 | `GET` | `/api/health` | Health check endpoint |
+
+**Example request:**
+```bash
+curl -X POST http://localhost:8000/api/recommend \
+  -H "Content-Type: application/json" \
+  -d '{"query": "a film about redemption in prison", "k": 5}'
+```
 
 ---
 
@@ -156,59 +166,47 @@ graph TD
 Semantic-Movie-Recommendation/
 ├── README.md
 ├── requirements.txt
-├── frontend/
-│   ├── package.json
-│   ├── public/
-│   └── src/
-│       ├── App.jsx               # Main React application
-│       ├── components/
-│       │   ├── SearchBar.jsx     # Query input component
-│       │   └── MovieCard.jsx     # Result display component
-│       └── index.js
 ├── backend/
-│   ├── package.json
-│   ├── server.js                 # Express server entry point
-│   ├── routes/
-│   │   └── recommendations.js   # Recommendation API route
-│   └── services/
-│       └── embedding_service.py # Python embedding service
+│   ├── app.py                   # FastAPI server
+│   ├── text_preprocessor.py     # Text cleaning & normalization
+│   ├── embedding_service.py     # Sentence-transformers wrapper
+│   ├── recommendation_engine.py # Core recommendation logic
+│   ├── generate_embeddings.py   # Batch embedding generation script
+│   └── evaluation.py            # precision@k, recall@k, nDCG@k
 ├── embeddings/
-│   └── (pre-computed .npy files — add after running generate_embeddings.py)
-├── screenshots/
-│   └── (UI screenshots)
+│   └── movies_metadata.csv      # 250-movie corpus
+├── tests/
+│   ├── test_text_preprocessor.py
+│   └── test_recommendation_engine.py
+├── notebooks/
+│   ├── 01_embedding_exploration.ipynb
+│   └── 02_recommendation_evaluation.ipynb
 └── docs/
-    └── architecture.md
+    └── api_reference.md
 ```
 
 ---
 
 ## 🚀 Setup & Installation
 
-### Backend (Python embedding service)
 ```bash
 git clone https://github.com/umeshpandeysh/Semantic-Movie-Recommendation.git
 cd Semantic-Movie-Recommendation
 
 python -m venv venv
-venv\Scripts\activate
+venv\Scripts\activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
+
+# Generate embeddings (requires sentence-transformers download ~80MB)
+python backend/generate_embeddings.py \
+  --metadata embeddings/movies_metadata.csv \
+  --output_dir embeddings/
+
+# Start the FastAPI server
+uvicorn backend.app:app --reload
 ```
 
-### Backend (Node.js API server)
-```bash
-cd backend
-npm install
-node server.js
-```
-
-### Frontend (React)
-```bash
-cd frontend
-npm install
-npm start
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+API available at [http://localhost:8000](http://localhost:8000) · Docs at [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
